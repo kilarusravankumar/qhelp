@@ -1,6 +1,9 @@
 mod config;
-
+mod llm;
+mod msg;
 use clap::Parser;
+use msg::Msg;
+use std::vec;
 
 #[derive(Parser)]
 #[command(name = "qhelp")]
@@ -26,9 +29,23 @@ fn main() {
             args.query
         );
     } else {
-        println!(
-            "I will query {}, then give compact and precise answer.",
-            args.query
+        let inputMsgs: vec::Vec<Msg> = vec![
+            Msg {
+                role: String::from("system"),
+                content: String::from(
+                    "Give a precise answer, no need to explain. if user asks for a command just give the command as response or if user asks for something else just give direct answer in one or two lines.",
+                ),
+            },
+            Msg {
+                role: String::from("user"),
+                content: args.query,
+            },
+        ];
+        print!(" using url {} and model {}", config.base_url, config.model);
+        llm::query_llm(
+            format!("{}/api/chat", config.base_url),
+            config.model,
+            inputMsgs,
         );
     }
 }
